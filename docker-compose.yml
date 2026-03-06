@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: petcare_api
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      FLASK_DEBUG: ${FLASK_DEBUG}
+      SECRET_KEY: ${SECRET_KEY}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_TOKEN_EXPIRES: ${JWT_ACCESS_TOKEN_EXPIRES}
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - petcare_net
+
+  db:
+    image: mariadb:11.3
+    container_name: petcare_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - petcare_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - petcare_net
+
+volumes:
+  petcare_db_data:
+
+networks:
+  petcare_net:
+    driver: bridge
