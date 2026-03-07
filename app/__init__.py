@@ -16,19 +16,18 @@ def create_app():
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
 
     from app.auth.routes.auth_routes import auth_bp
-
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
 
     from app.pets.routes.pet_routes import pets_bp
-
     app.register_blueprint(pets_bp, url_prefix="/api/v1/pets")
 
     from app.vaccines.routes.vaccine_routes import vaccine_bp
-
     app.register_blueprint(vaccine_bp, url_prefix="/api/v1")
 
     from app.owner.routes.owner_routes import owners_bp
-
     app.register_blueprint(owners_bp, url_prefix="/api/v1")
+
+    from app.admin.routes.admin_routes import admin_bp
+    app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
 
     return app
