@@ -59,7 +59,7 @@ def create_pet():
 
 @jwt_required()
 def get_pet(pet_id):
-    owner = get_current_owner
+    owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
     if not pet in pet.owners:
@@ -73,7 +73,7 @@ def get_pet(pet_id):
 
 @jwt_required()
 def update_pet(pet_id):
-    owner = get_current_owner
+    owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
     if not pet in pet.owners:
@@ -100,7 +100,7 @@ def update_pet(pet_id):
 
 @jwt_required()
 def delete_pet(pet_id):
-    owner = get_current_owner
+    owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
     if not pet in pet.owners:
