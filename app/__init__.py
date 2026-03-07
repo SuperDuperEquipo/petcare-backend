@@ -20,4 +20,7 @@ def create_app():
     from app.pets.routes.pet_routes import pets_bp
     app.register_blueprint(pets_bp, url_prefix="/api/v1/pets")
 
+    from app.appointments.routes.appointments_routes import appointments_bp
+    app.register_blueprint(appointments_bp, url_prefix="/api/v1/appointments")
+
     return app
