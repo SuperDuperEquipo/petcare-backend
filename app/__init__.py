@@ -27,4 +27,8 @@ def create_app():
 
     app.register_blueprint(vaccine_bp, url_prefix="/api/v1")
 
+    from app.owner.routes.owner_routes import owners_bp
+
+    app.register_blueprint(owners_bp, url_prefix="/api/v1")
+
     return app
