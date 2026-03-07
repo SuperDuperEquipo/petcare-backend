@@ -30,7 +30,9 @@ def create_vaccine(pet_id):
         name=data.get("name"),
         vet=data.get("vet"),
         next_dose=(
-            datetime.fromisoformat(data["next_dose"]) if data.get("next_dose") else None
+            datetime.fromisoformat(data["next_dose"]).date()
+            if data.get("next_dose")
+            else None
         ),
         pet_id=pet_id,
     )
@@ -85,7 +87,9 @@ def update_vaccine(vaccine_id):
         vaccine.vet = data["vet"].strip()
     if "next_dose" in data:
         vaccine.next_dose = (
-            datetime.fromisoformat(data["next_dose"]) if data.get("next_dose") else None
+            datetime.fromisoformat(data["next_dose"]).date()
+            if data.get("next_dose")
+            else None
         )
 
     db.session.commit()

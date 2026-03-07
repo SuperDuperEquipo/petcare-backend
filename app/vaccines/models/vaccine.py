@@ -8,9 +8,9 @@ class Vaccine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     date_applied = db.Column(
-        db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+        db.Date, default=lambda: datetime.now(timezone.utc), nullable=False
     )
-    next_dose = db.Column(db.DateTime)  # Puede o no tener una siguiente dosis.
+    next_dose = db.Column(db.Date)  # Puede o no tener una siguiente dosis.
     vet = db.Column(db.String(100), nullable=False)
     pet_id = db.Column(db.Integer, db.ForeignKey("pets.id"), nullable=False)
     created_at = db.Column(
