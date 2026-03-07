@@ -30,4 +30,7 @@ def create_app():
     from app.admin.routes.admin_routes import admin_bp
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
 
+    from app.appointments.routes.appointments_routes import appointments_bp
+    app.register_blueprint(appointments_bp, url_prefix="/api/v1/appointments")
+
     return app
