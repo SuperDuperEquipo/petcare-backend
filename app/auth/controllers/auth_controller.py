@@ -27,7 +27,10 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={"role": user.role}
+    )
 
     return jsonify({
         "message":      "Usuario registrado exitosamente",
@@ -55,7 +58,10 @@ def login():
     if not user.is_active:
         return jsonify({"error": "Cuenta desactivada. Contacta al soporte"}), 403
 
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={"role": user.role}
+    )
 
     return jsonify({
         "message":      "Inicio de sesión exitoso",

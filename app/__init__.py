@@ -3,6 +3,7 @@ from flask import Flask
 from app.config.config import config_by_name
 from app.core.extensions import db, migrate, jwt, cors
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -19,6 +20,15 @@ def create_app():
 
     from app.pets.routes.pet_routes import pets_bp
     app.register_blueprint(pets_bp, url_prefix="/api/v1/pets")
+
+    from app.vaccines.routes.vaccine_routes import vaccine_bp
+    app.register_blueprint(vaccine_bp, url_prefix="/api/v1")
+
+    from app.owner.routes.owner_routes import owners_bp
+    app.register_blueprint(owners_bp, url_prefix="/api/v1")
+
+    from app.admin.routes.admin_routes import admin_bp
+    app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
 
     from app.appointments.routes.appointments_routes import appointments_bp
     app.register_blueprint(appointments_bp, url_prefix="/api/v1/appointments")
