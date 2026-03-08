@@ -33,4 +33,7 @@ def create_app():
     from app.appointments.routes.appointments_routes import appointments_bp
     app.register_blueprint(appointments_bp, url_prefix="/api/v1/appointments")
 
+    from app.tips.routes.tip_routes import tips_bp
+    app.register_blueprint(tips_bp, url_prefix="/api/v1/tips")
+
     return app
