@@ -3,10 +3,28 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.core.extensions import db
 from app.vaccines.models.vaccine import Vaccine
+from app.owner.models.owner import Owner
+from app.pets.models.pet import Pet
+
+
+def get_current_owner():
+    current_user_id = int(get_jwt_identity())
+    return Owner.query.filter_by(user_id=current_user_id).first()
 
 
 @jwt_required()
 def get_vaccines(pet_id):
+
+    owner = get_current_owner()
+
+    if not owner:
+        return jsonify({"error": "Dueño no encontrado"}), 404
+
+    pet = Pet.query.get(pet_id)
+
+    if not pet or owner not in pet.owners:
+        return jsonify({"error": "Mascota no encontrada"}), 404
+
     vaccines = Vaccine.query.filter_by(pet_id=pet_id).all()
     return (
         jsonify(
@@ -21,6 +39,17 @@ def get_vaccines(pet_id):
 
 @jwt_required()
 def create_vaccine(pet_id):
+
+    owner = get_current_owner()
+
+    if not owner:
+        return jsonify({"error": "Dueño no encontrado"}), 404
+
+    pet = Pet.query.get(pet_id)
+
+    if not pet or owner not in pet.owners:
+        return jsonify({"error": "Mascota no encontrada"}), 404
+
     data = request.get_json(silent=True)
 
     if not data:
@@ -53,10 +82,20 @@ def create_vaccine(pet_id):
 
 @jwt_required()
 def get_vaccine(vaccine_id):
+    owner = get_current_owner()
+
+    if not owner:
+        return jsonify({"error": "Dueño no encontrado"}), 404
+
     vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
 
     if not vaccine:
         return jsonify({"error": "Vacuna no encontrada"}), 404
+
+    pet = Pet.query.get(vaccine.pet_id)
+
+    if owner not in pet.owners:
+        return jsonify({"error": "Acceso denegado"}), 404
 
     return (
         jsonify(
@@ -72,10 +111,18 @@ def get_vaccine(vaccine_id):
 @jwt_required()
 def update_vaccine(vaccine_id):
 
-    vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
+    owner = get_current_owner()
 
+    if not owner:
+        return jsonify({"error": "Dueño no encontrado"}), 404
+
+    vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
     if not vaccine:
         return jsonify({"error": "Vacuna no encontrada"}), 404
+
+    pet = Pet.query.get(vaccine.pet_id)
+    if owner not in pet.owners:
+        return jsonify({"error": "Acceso denegado"}), 404
 
     data = request.get_json(silent=True)
     if not data:
@@ -107,10 +154,21 @@ def update_vaccine(vaccine_id):
 
 @jwt_required()
 def delete_vaccine(vaccine_id):
+
+    owner = get_current_owner()
+
+    if not owner:
+        return jsonify({"error": "Dueño no encontrado"}), 404
+
     vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
 
     if not vaccine:
         return jsonify({"error": "Vacuna no encontrada"}), 404
+
+    pet = Pet.query.get(vaccine.pet_id)
+
+    if owner not in pet.owners:
+        return jsonify({"error": "Acceso denegado"}), 404
 
     db.session.delete(vaccine)
     db.session.commit()
