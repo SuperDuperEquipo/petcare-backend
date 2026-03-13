@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from app.config.config import config_by_name
 from app.core.extensions import db, migrate, jwt, cors
-
+from flask import jsonify
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +14,13 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+
+    @app.route('/api/v1/health', methods=['GET'])
+    def health_check():
+        return jsonify({
+            "status": "healthy",
+            "message": "PetCare API esta super duper funcionando"
+        }), 200
 
     from app.auth.routes.auth_routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
