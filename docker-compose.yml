@@ -47,6 +47,18 @@ services:
     networks:
       - petcare_net
 
+  frontend:
+    build:
+      context: ../petcare-frontend  # RUTA HACIA CARPETA DEL FRONT
+      dockerfile: Dockerfile
+    container_name: petcare_frontend
+    ports:
+      - "3000:80"
+    networks:
+      - petcare_net
+    depends_on:
+      - api
+
 volumes:
   petcare_db_data:
 
