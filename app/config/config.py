@@ -13,14 +13,15 @@ class Config:
     JWT_TOKEN_LOCATION = ["headers"]
     JWT_HEADER_NAME = "Authorization"
     JWT_HEADER_TYPE = "Bearer"
+    CORS_HEADERS = "Content-Type"
 
     @staticmethod
     def get_db_uri():
-        user     = os.getenv("DB_USER", "petcare_user")
+        user = os.getenv("DB_USER", "petcare_user")
         password = os.getenv("DB_PASSWORD", "petcare_pass")
-        host     = os.getenv("DB_HOST", "localhost")
-        port     = os.getenv("DB_PORT", "3306")
-        name     = os.getenv("DB_NAME", "petcare_db")
+        host = os.getenv("DB_HOST", "localhost")
+        port = os.getenv("DB_PORT", "3306")
+        name = os.getenv("DB_NAME", "petcare_db")
         return f"mysql+pymysql://{user}:{password}@{host}:{port}/{name}"
 
 
@@ -36,5 +37,5 @@ class ProductionConfig(Config):
 
 config_by_name = {
     "development": DevelopmentConfig,
-    "production":  ProductionConfig,
+    "production": ProductionConfig,
 }
