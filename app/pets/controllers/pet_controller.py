@@ -4,16 +4,18 @@ from app.core.extensions import db
 from app.pets.models.pet import Pet
 from app.owner.models.owner import Owner
 
+
 def get_current_owner():
     current_user_id = int(get_jwt_identity())
     return Owner.query.filter_by(user_id=current_user_id).first()
 
+
 @jwt_required()
 def get_pets():
     owner = get_current_owner()
-    
+
     if not owner:
-        return jsonify ({"Error: no hay dueño para esta mascota"}), 404
+        return jsonify({"error": "No hay dueño para esta mascota"}), 404
 
     pets = owner.pets
 
@@ -39,12 +41,12 @@ def create_pet():
         return jsonify({"error": "El nombre y la especie son obligatorios"}), 422
 
     pet = Pet(
-        name = name,
-        species = species,
-        breed = data.get("breed"),
-        birth_date = data.get("birth_date"),
-        weight = data.get("weight"),
-        photo_url = data.get("photo_url"),
+        name=name,
+        species=species,
+        breed=data.get("breed"),
+        birth_date=data.get("birth_date"),
+        weight=data.get("weight"),
+        photo_url=data.get("photo_url"),
     )
     pet.owners.append(owner)
 
@@ -62,7 +64,7 @@ def get_pet(pet_id):
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
-    if not pet in pet.owners:
+    if not pet or owner not in pet.owners:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     return jsonify({
@@ -76,7 +78,7 @@ def update_pet(pet_id):
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
-    if not pet in pet.owners:
+    if not pet or owner not in pet.owners:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     data = request.get_json(silent=True)
@@ -103,7 +105,7 @@ def delete_pet(pet_id):
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
-    if not pet in pet.owners:
+    if not pet or owner not in pet.owners:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     db.session.delete(pet)
