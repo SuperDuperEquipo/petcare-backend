@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.pets.models.pet import Pet
 from app.owner.models.owner import Owner
@@ -10,8 +10,17 @@ def get_current_owner():
     return Owner.query.filter_by(user_id=current_user_id).first()
 
 
+def require_owner_role():
+    claims = get_jwt()
+    if claims.get("role") != "owner":
+        return jsonify({"error": "Acceso restringido para dueños de mascotas"}), 403
+    return None
+
+
 @jwt_required()
 def get_pets():
+    err = require_owner_role()
+    if err: return err
     owner = get_current_owner()
 
     if not owner:
@@ -28,6 +37,8 @@ def get_pets():
 
 @jwt_required()
 def create_pet():
+    err = require_owner_role()
+    if err: return err    
     owner = get_current_owner()
     data = request.get_json(silent=True)
 
@@ -61,6 +72,8 @@ def create_pet():
 
 @jwt_required()
 def get_pet(pet_id):
+    err = require_owner_role()
+    if err: return err
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
@@ -75,6 +88,8 @@ def get_pet(pet_id):
 
 @jwt_required()
 def update_pet(pet_id):
+    err = require_owner_role()
+    if err: return err    
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
@@ -102,6 +117,8 @@ def update_pet(pet_id):
 
 @jwt_required()
 def delete_pet(pet_id):
+    err = require_owner_role()
+    if err: return err
     owner = get_current_owner()
     pet = Pet.query.get(pet_id)
 
