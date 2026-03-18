@@ -1,16 +1,28 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.appointments.models.appointment import Appointment
 from app.pets.models.pet import Pet
+from app.owner.models.owner import Owner
+
 
 def get_current_owner():
-    from app.owner.models.owner import Owner
     current_user_id = int(get_jwt_identity())
     return Owner.query.filter_by(user_id=current_user_id).first()
 
+
+def require_owner_role():
+    claims = get_jwt()
+    if claims.get("role") != "user":
+        return jsonify({"error": "Acceso restringido para dueños de mascotas"}), 403
+    return None
+
+
 @jwt_required()
 def get_appointments():
+    err = require_owner_role()
+    if err: return err
+
     owner = get_current_owner()
     if not owner:
         return jsonify({"error": "No hay dueño"}), 404
@@ -28,8 +40,12 @@ def get_appointments():
         "total": len(appointments),
     }), 200
 
+
 @jwt_required()
 def create_appointment():
+    err = require_owner_role()
+    if err: return err
+
     owner = get_current_owner()
     data = request.get_json(silent=True)
 
@@ -66,8 +82,12 @@ def create_appointment():
         "cita": appointment.to_dict(),
     }), 201
 
+
 @jwt_required()
 def get_appointment(appointment_id):
+    err = require_owner_role()
+    if err: return err
+
     owner = get_current_owner()
 
     appointment = (
@@ -86,9 +106,14 @@ def get_appointment(appointment_id):
         "cita": appointment.to_dict(),
     }), 200
 
+
 @jwt_required()
 def update_appointment(appointment_id):
+    err = require_owner_role()
+    if err: return err
+
     owner = get_current_owner()
+
     appointment = (
         Appointment.query
         .join(Pet)
@@ -117,9 +142,14 @@ def update_appointment(appointment_id):
         "cita": appointment.to_dict(),
     }), 200
 
+
 @jwt_required()
 def delete_appointment(appointment_id):
+    err = require_owner_role()
+    if err: return err
+
     owner = get_current_owner()
+
     appointment = (
         Appointment.query
         .join(Pet)
@@ -134,4 +164,6 @@ def delete_appointment(appointment_id):
     db.session.delete(appointment)
     db.session.commit()
 
-    return jsonify({"mensaje": "Cita eliminada exitosamente"}), 200
+    return jsonify({
+        "mensaje": "Cita eliminada exitosamente"
+    }), 200
