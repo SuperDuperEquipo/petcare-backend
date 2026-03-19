@@ -2,31 +2,30 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.pets.models.pet import Pet
-from app.owner.models.owner import Owner
 
 
-def get_current_owner():
-    current_user_id = int(get_jwt_identity())
-    return Owner.query.filter_by(user_id=current_user_id).first()
+def get_current_user():
+    return int(get_jwt_identity())
 
 
-def require_owner_role():
+def require_user_role():
     claims = get_jwt()
-    if claims.get("role") != "owner":
+    if claims.get("role") != "user":
         return jsonify({"error": "Acceso restringido para dueños de mascotas"}), 403
     return None
 
 
 @jwt_required()
 def get_pets():
-    err = require_owner_role()
-    if err: return err
-    owner = get_current_owner()
 
-    if not owner:
+    err = require_user_role()
+    if err: return err
+    user_id = get_current_user()
+
+    if not user_id:
         return jsonify({"error": "No hay dueño para esta mascota"}), 404
 
-    pets = owner.pets
+    pets = Pet.query.filter_by(user_id=user_id).all()
 
     return jsonify({
         "mensaje": "Mascotas obtenidas exitosamente",
@@ -37,9 +36,9 @@ def get_pets():
 
 @jwt_required()
 def create_pet():
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err    
-    owner = get_current_owner()
+    user_id = get_current_user()
     data = request.get_json(silent=True)
 
     if not data:
@@ -58,9 +57,9 @@ def create_pet():
         birth_date=data.get("birth_date"),
         weight=data.get("weight"),
         photo_url=data.get("photo_url"),
+        user_id = user_id
     )
-    pet.owners.append(owner)
-
+    
     db.session.add(pet)
     db.session.commit()
 
@@ -72,12 +71,13 @@ def create_pet():
 
 @jwt_required()
 def get_pet(pet_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
-    owner = get_current_owner()
-    pet = Pet.query.get(pet_id)
+    user_id = get_current_user()
+    
+    pet = Pet.query.filter_by(id=pet_id, user_id=user_id).first()
 
-    if not pet or owner not in pet.owners:
+    if not pet:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     return jsonify({
@@ -88,12 +88,12 @@ def get_pet(pet_id):
 
 @jwt_required()
 def update_pet(pet_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err    
-    owner = get_current_owner()
-    pet = Pet.query.get(pet_id)
+    user_id = get_current_user()
+    pet = Pet.query.filter_by(id=pet_id, user_id=user_id).first()
 
-    if not pet or owner not in pet.owners:
+    if not pet:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     data = request.get_json(silent=True)
@@ -117,12 +117,12 @@ def update_pet(pet_id):
 
 @jwt_required()
 def delete_pet(pet_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
-    owner = get_current_owner()
-    pet = Pet.query.get(pet_id)
+    user_id = get_current_user()
+    pet = Pet.query.filter_by(id=pet_id, user_id=user_id).first()
 
-    if not pet or owner not in pet.owners:
+    if not pet:
         return jsonify({"error": "Mascota no encontrada"}), 404
 
     db.session.delete(pet)

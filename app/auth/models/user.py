@@ -20,6 +20,9 @@ class User(db.Model):
         nullable=False,
     )
 
+    #Relación de 1:M entre usuario y mascota
+    pets = db.relationship("Pet", backref="user", cascade="all, delete-orphan")
+
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
