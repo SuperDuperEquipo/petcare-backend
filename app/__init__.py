@@ -13,7 +13,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    cors.init_app(app, resources={r"/api/.*": {"origins": "*"}})
 
     @app.route('/api/v1/health', methods=['GET'])
     def health_check():
@@ -21,6 +21,14 @@ def create_app():
             "status": "healthy",
             "message": "PetCare API esta super duper funcionando"
         }), 200
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        from werkzeug.exceptions import HTTPException
+        if isinstance(e, HTTPException):
+            return jsonify({"error": e.description}), e.code
+        app.logger.exception(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
 
     from app.auth.routes.auth_routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
@@ -30,9 +38,6 @@ def create_app():
 
     from app.vaccines.routes.vaccine_routes import vaccine_bp
     app.register_blueprint(vaccine_bp, url_prefix="/api/v1")
-
-    from app.owner.routes.owner_routes import owners_bp
-    app.register_blueprint(owners_bp, url_prefix="/api/v1")
 
     from app.admin.routes.admin_routes import admin_bp
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")

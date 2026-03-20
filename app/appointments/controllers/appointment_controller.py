@@ -3,15 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.appointments.models.appointment import Appointment
 from app.pets.models.pet import Pet
-from app.owner.models.owner import Owner
 
 
-def get_current_owner():
-    current_user_id = int(get_jwt_identity())
-    return Owner.query.filter_by(user_id=current_user_id).first()
-
-
-def require_owner_role():
+def require_user_role():
     claims = get_jwt()
     if claims.get("role") != "user":
         return jsonify({"error": "Acceso restringido para dueños de mascotas"}), 403
@@ -20,17 +14,15 @@ def require_owner_role():
 
 @jwt_required()
 def get_appointments():
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
 
-    owner = get_current_owner()
-    if not owner:
-        return jsonify({"error": "No hay dueño"}), 404
+    current_user_id = int(get_jwt_identity())
 
     appointments = (
         Appointment.query
         .join(Pet)
-        .filter(Pet.owners.contains(owner))
+        .filter(Pet.user_id == current_user_id)
         .all()
     )
 
@@ -43,10 +35,10 @@ def get_appointments():
 
 @jwt_required()
 def create_appointment():
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
 
-    owner = get_current_owner()
+    current_user_id = int(get_jwt_identity())
     data = request.get_json(silent=True)
 
     if not data:
@@ -61,9 +53,9 @@ def create_appointment():
     if not title or not date or not time or not type_ or not pet_id:
         return jsonify({"error": "title, date, time, type y pet_id son obligatorios"}), 422
 
-    pet = Pet.query.get(pet_id)
-    if not pet or owner not in pet.owners:
-        return jsonify({"error": "Mascota no encontrada o no pertenece al dueño"}), 404
+    pet = Pet.query.filter_by(id=pet_id, user_id=current_user_id).first()
+    if not pet:
+        return jsonify({"error": "Mascota no encontrada o no pertenece al usuario"}), 404
 
     appointment = Appointment(
         title=title,
@@ -85,16 +77,16 @@ def create_appointment():
 
 @jwt_required()
 def get_appointment(appointment_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
 
-    owner = get_current_owner()
+    current_user_id = int(get_jwt_identity())
 
     appointment = (
         Appointment.query
         .join(Pet)
         .filter(Appointment.id == appointment_id)
-        .filter(Pet.owners.contains(owner))
+        .filter(Pet.user_id == current_user_id)
         .first()
     )
 
@@ -109,16 +101,16 @@ def get_appointment(appointment_id):
 
 @jwt_required()
 def update_appointment(appointment_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
 
-    owner = get_current_owner()
+    current_user_id = int(get_jwt_identity())
 
     appointment = (
         Appointment.query
         .join(Pet)
         .filter(Appointment.id == appointment_id)
-        .filter(Pet.owners.contains(owner))
+        .filter(Pet.user_id == current_user_id)
         .first()
     )
 
@@ -145,16 +137,16 @@ def update_appointment(appointment_id):
 
 @jwt_required()
 def delete_appointment(appointment_id):
-    err = require_owner_role()
+    err = require_user_role()
     if err: return err
 
-    owner = get_current_owner()
+    current_user_id = int(get_jwt_identity())
 
     appointment = (
         Appointment.query
         .join(Pet)
         .filter(Appointment.id == appointment_id)
-        .filter(Pet.owners.contains(owner))
+        .filter(Pet.user_id == current_user_id)
         .first()
     )
 
