@@ -10,6 +10,7 @@ services:
     environment:
       FLASK_ENV: ${FLASK_ENV}
       FLASK_DEBUG: ${FLASK_DEBUG}
+      FLASK_APP: run.py
       SECRET_KEY: ${SECRET_KEY}
       DB_HOST: db
       DB_PORT: 3306
@@ -23,6 +24,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: sh -c "flask db upgrade && python run.py"
     networks:
       - petcare_net
 
@@ -43,25 +45,25 @@ services:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     networks:
       - petcare_net
 
   frontend:
     build:
-      context: ../petcare-frontend  # RUTA HACIA CARPETA DEL FRONT
+      context: ../petcare-frontend
       dockerfile: Dockerfile
     container_name: petcare_frontend
+    restart: unless-stopped
     ports:
       - "3000:80"
-    networks:
-      - petcare_net
     depends_on:
       - api
+    networks:
+      - petcare_net
 
 volumes:
   petcare_db_data:
 
 networks:
   petcare_net:
-    driver: bridge
