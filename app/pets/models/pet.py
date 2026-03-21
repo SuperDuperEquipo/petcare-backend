@@ -12,8 +12,6 @@ class Pet(db.Model):
     weight      = db.Column(db.Float, nullable=True)
     photo_url   = db.Column(db.String(255), nullable=True)
     user_id     = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-
-    owners      = db.relationship("Owner", secondary="pet_owner", back_populates="pets")
     created_at  = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at  = db.Column(
         db.DateTime,
