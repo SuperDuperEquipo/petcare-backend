@@ -35,7 +35,13 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = Config.get_db_uri()
 
 
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+
+
 config_by_name = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
+    "testing": TestingConfig,
 }
