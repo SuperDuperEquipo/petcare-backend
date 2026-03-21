@@ -39,9 +39,20 @@ def create_vaccine(pet_id):
     if not data:
         return jsonify({"error": "El cuerpo de la petición debe ser JSON"}), 400
 
+    if not data.get("name") or not data.get("vet") or not data.get("date_applied"):
+        return (
+            jsonify({"error": "El nombre, veterinario y fecha son obligatorios"}),
+            400,
+        )
+
     vaccine = Vaccine(
         name=data.get("name"),
         vet=data.get("vet"),
+        date_applied=(
+            datetime.fromisoformat(data["date_applied"]).date()
+            if data.get("date_applied")
+            else datetime.now().date()
+        ),
         next_dose=(
             datetime.fromisoformat(data["next_dose"]).date()
             if data.get("next_dose")
