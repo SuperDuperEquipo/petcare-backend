@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.appointments.models.appointment import Appointment
 from app.pets.models.pet import Pet
+from datetime import datetime
 
 
 def require_user_role():
@@ -45,10 +46,15 @@ def create_appointment():
         return jsonify({"error": "El cuerpo de la petición debe ser JSON"}), 400
 
     title = data.get("title", "").strip()
-    date = data.get("date")
-    time = data.get("time")
+    #date = data.get("date")
+    #time = data.get("time")
     type_ = data.get("type", "").strip()
     pet_id = data.get("pet_id")
+    try:
+        date = datetime.strptime(data.get("date", ""), "%Y-%m-%d").date()
+        time = datetime.strptime(data.get("time", ""), "%H:%M:%S").time()
+    except ValueError:
+        return jsonify({"error": "Formato de fecha u hora inválido. Use YYYY-MM-DD y HH:MM:SS"}), 422
 
     if not title or not date or not time or not type_ or not pet_id:
         return jsonify({"error": "title, date, time, type y pet_id son obligatorios"}), 422
@@ -122,10 +128,16 @@ def update_appointment(appointment_id):
         return jsonify({"error": "El cuerpo de la petición debe ser JSON"}), 400
 
     if "title" in data: appointment.title = data["title"].strip()
-    if "date" in data: appointment.date = data["date"]
-    if "time" in data: appointment.time = data["time"]
+    #if "date" in data: appointment.date = data["date"]
+    #if "time" in data: appointment.time = data["time"]
     if "type" in data: appointment.type = data["type"].strip()
     if "description" in data: appointment.description = data["description"]
+
+    try:
+        if "date" in data: appointment.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+        if "time" in data: appointment.time = datetime.strptime(data["time"], "%H:%M:%S").time()
+    except ValueError:
+        return jsonify({"error": "Formato de fecha u hora inválido. Use YYYY-MM-DD y HH:MM:SS"}), 422
 
     db.session.commit()
 
