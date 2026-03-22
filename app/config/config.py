@@ -38,10 +38,19 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+<<<<<<< Updated upstream
+=======
+    JWT_SECRET_KEY = "test-jwt-secret"
+    JWT_ACCESS_TOKEN_EXPIRES = False
+>>>>>>> Stashed changes
 
 
 config_by_name = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
     "testing": TestingConfig,
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes
