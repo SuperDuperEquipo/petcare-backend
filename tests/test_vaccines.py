@@ -13,7 +13,7 @@ def test_get_vaccines_sin_token(client, pet_id):
 
 
 def test_crear_vacuna_datos_incompletos(client, auth_token, pet_id):
-    """Sin datos obligatorios debe devolver 422"""
+    """Sin datos obligatorios debe devolver 400"""
     res = client.post(
         f"/api/v1/pets/{pet_id}/vaccines",
         json={"date_applied": "2024-08-02"},
@@ -32,6 +32,57 @@ def test_crear_vacuna_mascota_inexistente(client, auth_token):
     )
     print(f"\nError mascota no encontrada: {res.status_code} - {res.get_json()}")
     assert res.status_code == 404
+
+
+def test_eliminar_vacuna_inexistente(client, auth_token):
+    """Eliminar un ID que no existe, debe devolver 404"""
+    res = client.delete(
+        "/api/v1/vaccines/785", headers={"Authorization": f"Bearer {auth_token}"}
+    )
+    print(f"\nEliminar vacuna inexistente: {res.status_code} - {res.get_json()}")
+    assert res.status_code == 404
+
+
+def test_actualizar_vacuna_inexistente(client, auth_token):
+    """Actualizar un ID que no existe, debe devolver 404"""
+    res = client.put(
+        "/api/v1/vaccines/785",
+        json={"name": "Rabia"},
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    print(f"\nActualizar vacuna inexistente: {res.status_code} - {res.get_json()}")
+    assert res.status_code == 404
+
+
+def test_token_expirado(client, app, pet_id):
+    """Token vencido, debe devolver 401"""
+    from flask_jwt_extended import create_access_token
+    from datetime import timedelta
+
+    with app.app_context():
+        with app.test_request_context():
+            token_expirado = create_access_token(
+                identity="1", expires_delta=timedelta(seconds=-1)
+            )
+
+    res = client.get(
+        f"/api/v1/pets/{pet_id}/vaccines",
+        headers={"Authorization": f"Bearer {token_expirado}"},
+    )
+    print(f"\nError token expirado: {res.status_code} - {res.get_json()}")
+    assert res.status_code == 401
+
+
+def test_crear_vacuna_body_no_json(client, auth_token, pet_id):
+    """Body que no es JSON, debe devolver 400"""
+    res = client.post(
+        f"/api/v1/pets/{pet_id}/vaccines",
+        data="no es un JSON",
+        content_type="text/plain",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    print(f"\nError debe ser un JSON: {res.status_code} - {res.get_json()}")
+    assert res.status_code == 400
 
 
 # Pruebas de integración
@@ -126,7 +177,7 @@ def test_obtener_vacuna_id(client, auth_token, pet_id):
 
 
 def test_acceso_con_rol_admin(client, app, pet_id):
-    """Un admin no puede acceder a vaccines, debe devolver 403"""
+    """Un admin no puede acceder a vaccines, debe devolver 404"""
 
     with app.app_context():
         admin = User(name="Admin", email="admin@petcare.com", role="admin")
