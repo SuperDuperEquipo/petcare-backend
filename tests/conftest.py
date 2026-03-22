@@ -2,12 +2,13 @@ import pytest
 import os
 import logging
 
-os.environ['FLASK_ENV'] = 'testing'
+os.environ["FLASK_ENV"] = "testing"
 
-logging.basicConfig(level=logging.DEBUG) 
+logging.basicConfig(level=logging.DEBUG)
 
 from app import create_app
 from app.core.extensions import db
+
 
 @pytest.fixture
 def app():
@@ -18,15 +19,26 @@ def app():
         yield app
         db.drop_all()
 
+
 @pytest.fixture
 def client(app):
     return app.test_client()
 
+
 @pytest.fixture
 def auth_token(client):
-    res = client.post('/api/v1/auth/register', json={
-        "name": "Test User",
-        "email": "test@petcare.com",
-        "password": "123456"
-    })
-    return res.get_json()['access_token']
+    res = client.post(
+        "/api/v1/auth/register",
+        json={"name": "Test User", "email": "test@petcare.com", "password": "123456"},
+    )
+    return res.get_json()["access_token"]
+
+
+@pytest.fixture
+def pet_id(client, auth_token):
+    res = client.post(
+        "/api/v1/pets",
+        json={"name": "Sandy", "species": "Perro"},
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    return res.get_json()["mascota"]["id"]

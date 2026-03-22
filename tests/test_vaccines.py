@@ -4,17 +4,6 @@ from app.core.extensions import db
 from app.auth.models.user import User
 
 
-# Fixture
-@pytest.fixture
-def pet_id(client, auth_token):
-    res = client.post(
-        "/api/v1/pets",
-        json={"name": "Sandy", "species": "Perro"},
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-    return res.get_json()["mascota"]["id"]
-
-
 # Pruebas unitarias
 def test_get_vaccines_sin_token(client, pet_id):
     """Sin token debe devolver 401"""
