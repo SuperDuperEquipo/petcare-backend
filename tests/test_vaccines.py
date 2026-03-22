@@ -13,14 +13,14 @@ def test_get_vaccines_sin_token(client, pet_id):
 
 
 def test_crear_vacuna_datos_incompletos(client, auth_token, pet_id):
-    """Sin datos obligatorios debe devolver 400"""
+    """Sin datos obligatorios debe devolver 422"""
     res = client.post(
         f"/api/v1/pets/{pet_id}/vaccines",
         json={"date_applied": "2024-08-02"},
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     print(f"\nError data incompleta: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 400
+    assert res.status_code == 422
 
 
 def test_crear_vacuna_mascota_inexistente(client, auth_token):
@@ -177,7 +177,7 @@ def test_obtener_vacuna_id(client, auth_token, pet_id):
 
 
 def test_acceso_con_rol_admin(client, app, pet_id):
-    """Un admin no puede acceder a vaccines, debe devolver 404"""
+    """Un admin no puede acceder a vaccines, debe devolver 403"""
 
     with app.app_context():
         admin = User(name="Admin", email="admin@petcare.com", role="admin")
@@ -196,7 +196,7 @@ def test_acceso_con_rol_admin(client, app, pet_id):
         f"/api/v1/pets/{pet_id}/vaccines", headers={"Authorization": f"Bearer {token}"}
     )
     print(f"\nAcceso con rol admin: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 404
+    assert res.status_code == 403
 
 
 def test_get_vaccines_mascota_ajena(client, app, pet_id):
@@ -218,4 +218,4 @@ def test_get_vaccines_mascota_ajena(client, app, pet_id):
             headers={"Authorization": f"Bearer {token_userNoDueño}"},
         )
 
-        assert res.status_code == 404
+        assert res.status_code == 403

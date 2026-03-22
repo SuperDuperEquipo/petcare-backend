@@ -1,13 +1,25 @@
 from datetime import datetime
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.core.extensions import db
 from app.vaccines.models.vaccine import Vaccine
 from app.pets.models.pet import Pet
 
 
+def require_user_role():
+    claims = get_jwt()
+    if claims.get("role") != "user":
+        return jsonify({"error": "Acceso restringido para dueños de mascotas"}), 403
+    return None
+
+
 @jwt_required()
 def get_vaccines(pet_id):
+
+    err = require_user_role()
+    if err:
+        return err
+
     current_user_id = int(get_jwt_identity())
     pet = Pet.query.filter_by(id=pet_id, user_id=current_user_id).first()
 
@@ -28,6 +40,11 @@ def get_vaccines(pet_id):
 
 @jwt_required()
 def create_vaccine(pet_id):
+
+    err = require_user_role()
+    if err:
+        return err
+
     current_user_id = int(get_jwt_identity())
     pet = Pet.query.filter_by(id=pet_id, user_id=current_user_id).first()
 
@@ -42,7 +59,7 @@ def create_vaccine(pet_id):
     if not data.get("name") or not data.get("vet") or not data.get("date_applied"):
         return (
             jsonify({"error": "El nombre, veterinario y fecha son obligatorios"}),
-            400,
+            422,
         )
 
     vaccine = Vaccine(
@@ -77,6 +94,11 @@ def create_vaccine(pet_id):
 
 @jwt_required()
 def get_vaccine(vaccine_id):
+
+    err = require_user_role()
+    if err:
+        return err
+
     current_user_id = int(get_jwt_identity())
     vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
 
@@ -101,6 +123,11 @@ def get_vaccine(vaccine_id):
 
 @jwt_required()
 def update_vaccine(vaccine_id):
+
+    err = require_user_role()
+    if err:
+        return err
+
     current_user_id = int(get_jwt_identity())
     vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
 
@@ -142,6 +169,11 @@ def update_vaccine(vaccine_id):
 
 @jwt_required()
 def delete_vaccine(vaccine_id):
+
+    err = require_user_role()
+    if err:
+        return err
+
     current_user_id = int(get_jwt_identity())
     vaccine = Vaccine.query.filter_by(id=vaccine_id).first()
 
