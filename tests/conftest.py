@@ -113,3 +113,16 @@ def usuario_admin(client, app):
                 identity=str(admin.id), additional_claims={"role": "admin"}
             )
     return {"user": {"email": "admin@petcare.com"}, "token": token}
+
+@pytest.fixture
+def user_id(client):
+    """Crea un usuario normal y retorna su id"""
+    res = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Usuario Test",
+            "email": "user_test@petcare.com",
+            "password": "123456"
+        },
+    )
+    return res.get_json()["user"]["id"]
