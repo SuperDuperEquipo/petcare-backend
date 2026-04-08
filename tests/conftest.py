@@ -54,10 +54,10 @@ def admin_token(client, app):
         db.session.commit()
 
         from flask_jwt_extended import create_access_token
+
         with app.test_request_context():
             token = create_access_token(
-                identity=str(admin.id),
-                additional_claims={"role": "admin"}
+                identity=str(admin.id), additional_claims={"role": "admin"}
             )
     return token
 
@@ -68,10 +68,10 @@ def appointment_id(client, auth_token, pet_id):
         "/api/v1/appointments",
         json={
             "title": "Consulta general",
-            "date": "2026-04-01",
+            "date": "2027-04-01",
             "time": "10:00:00",
             "type": "Consulta",
-            "pet_id": pet_id
+            "pet_id": pet_id,
         },
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -82,10 +82,18 @@ def appointment_id(client, auth_token, pet_id):
 def usuario_registrado(client):
     res = client.post(
         "/api/v1/auth/register",
-        json={"name": "Test User", "email": "test@petcare.com", "password": "password123"},
+        json={
+            "name": "Test User",
+            "email": "test@petcare.com",
+            "password": "password123",
+        },
     )
     data = res.get_json()
-    return {"user": data["user"], "token": data["access_token"], "password": "password123"}
+    return {
+        "user": data["user"],
+        "token": data["access_token"],
+        "password": "password123",
+    }
 
 
 @pytest.fixture
@@ -99,9 +107,9 @@ def usuario_admin(client, app):
         db.session.commit()
 
         from flask_jwt_extended import create_access_token
+
         with app.test_request_context():
             token = create_access_token(
-                identity=str(admin.id),
-                additional_claims={"role": "admin"}
+                identity=str(admin.id), additional_claims={"role": "admin"}
             )
     return {"user": {"email": "admin@petcare.com"}, "token": token}
