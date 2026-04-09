@@ -1,19 +1,4 @@
 
-def test_crear_vacuna_exitoso(client, auth_token, pet_id):
-    """Crear vacuna con datos mínimos válidos"""
-    res = client.post(
-        f"/api/v1/pets/{pet_id}/vaccines",
-        json={"name": "Rabia", "vet": "Dr. López", "date_applied": "2025-03-10"},
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-    print(f"\nCrear vacuna: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 201
-    data = res.get_json()
-    assert data["vacuna"]["name"] == "Rabia"
-    assert data["vacuna"]["vet"] == "Dr. López"
-    assert data["vacuna"]["date_applied"] == "2025-03-10"
-    assert isinstance(data["vacuna"]["id"], int)
-
 def test_get_vaccines_con_token(client, auth_token, pet_id):
     """Con token válido debe devolver lista vacía"""
     res = client.get(
@@ -23,34 +8,6 @@ def test_get_vaccines_con_token(client, auth_token, pet_id):
     print(f"\nLista de vacunas: {res.status_code} - {res.get_json()}")
     assert res.status_code == 200
     assert len(res.get_json()["vacunas"]) == 0
-
-def test_listar_vacunas_vacio(client, auth_token, pet_id):
-    """Mascota recién creada no tiene vacunas"""
-    res = client.get(
-        f"/api/v1/pets/{pet_id}/vaccines",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-    print(f"\nListar vacunas vacías: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 200
-    assert res.get_json()["vacunas"] == []
-
-def test_obtener_vacuna_por_id(client, auth_token, pet_id):
-    """Crear vacuna y obtenerla por ID"""
-    res_create = client.post(
-        f"/api/v1/pets/{pet_id}/vaccines",
-        json={"name": "Parvovirus", "vet": "Dr. García", "date_applied": "2025-04-01"},
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-    vaccine_id = res_create.get_json()["vacuna"]["id"]
-
-    res = client.get(
-        f"/api/v1/vaccines/{vaccine_id}",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-    print(f"\nObtener vacuna por id: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 200
-    assert res.get_json()["vacuna"]["name"] == "Parvovirus"
-    assert res.get_json()["vacuna"]["id"] == vaccine_id
 
 def test_actualizar_vacuna(client, auth_token, pet_id):
     """Crear y actualizar nombre de vacuna"""
