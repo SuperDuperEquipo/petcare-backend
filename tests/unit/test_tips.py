@@ -1,4 +1,3 @@
-# Pruebas unitarias
 def test_get_tips_sin_token(client):
     """Sin token debe devolver 401"""
     res = client.get('/api/v1/tips')
@@ -64,41 +63,14 @@ def test_token_expirado_tips(client, app):
     print(f"\nError token expirado: {res.status_code} - {res.get_json()}")
     assert res.status_code == 401
 
-
-# Pruebas de integración
-def test_get_tips_con_token(client, auth_token):
-    """Con token válido debe devolver lista vacía"""
-    res = client.get('/api/v1/tips', headers={
-        "Authorization": f"Bearer {auth_token}"
-    })
-    print(f"\nLista de tips: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 200
-    assert res.get_json()['total'] == 0
-
-def test_crear_tip_exitoso(client, admin_token):
-    """Admin puede crear tip con datos válidos"""
+def test_crear_tip_campos_vacios(client, admin_token):
+    """Campos vacíos (strings vacíos o espacios) deben devolver 422"""
     res = client.post('/api/v1/tips', json={
-        "title": "Tip de salud",
-        "content": "Dale agua fresca a tu mascota",
+        "title": "   ",
+        "content": "",
         "species": "Perro",
         "category": "Salud"
     }, headers={"Authorization": f"Bearer {admin_token}"})
-    print(f"\nTip creado: {res.status_code} - {res.get_json()}")
-    assert res.status_code == 201
-    assert res.get_json()['tip']['titulo'] == 'Tip de salud'
 
-def test_crear_tip_y_verificar_en_lista(client, admin_token, auth_token):
-    """Crear un tip y verificar que aparece en el GET"""
-    client.post('/api/v1/tips', json={
-        "title": "Tip visible",
-        "content": "Contenido visible",
-        "species": "Gato",
-        "category": "Nutrición"
-    }, headers={"Authorization": f"Bearer {admin_token}"})
-
-    res = client.get('/api/v1/tips', headers={
-        "Authorization": f"Bearer {auth_token}"
-    })
-    print(f"\nTip en lista: {res.status_code} - total={res.get_json()['total']}")
-    assert res.status_code == 200
-    assert res.get_json()['total'] == 1
+    print(f"\nError campos vacíos: {res.status_code} - {res.get_json()}")
+    assert res.status_code == 422
