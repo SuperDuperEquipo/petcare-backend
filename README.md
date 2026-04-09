@@ -1,4 +1,4 @@
-# PetCare 
+# 🐾 PetCare
 
 ## Descripción
 
@@ -6,20 +6,20 @@ Este proyecto consiste en una aplicación backend para la gestión de un sistema
 
 La aplicación incluye:
 
-* API backend en Python (Flask)
-* Base de datos MariaDB
-* Frontend conectado a la API
-* Orquestación completa con Docker Compose
+- API backend en Python (Flask)
+- Base de datos MariaDB
+- Frontend conectado a la API
+- Orquestación completa con Docker Compose
 
 ---
 
 ## Tecnologías utilizadas
 
-* Python 3.11
-* Flask
-* MariaDB
-* Docker
-* Docker Compose
+- Python 3.11
+- Flask
+- MariaDB
+- Docker
+- Docker Compose
 
 ---
 
@@ -27,11 +27,8 @@ La aplicación incluye:
 
 ### 1. Clonar el repositorio
 
-```bash
-git clone https://github.com/SuperDuperEquipo/petcare-backend
-git clone https://github.com/SuperDuperEquipo/petcare-backend
-cd petcare-backend
-```
+    git clone https://github.com/SuperDuperEquipo/petcare-backend
+    cd petcare-backend
 
 ---
 
@@ -39,82 +36,166 @@ cd petcare-backend
 
 Crear un archivo `.env` basado en `.env.example`:
 
-```bash
-cp .env.example .env
-```
+    cp .env.example .env
 
 ---
 
 ### 3. Levantar los servicios
 
-```bash
-docker-compose up --build
-```
+    docker-compose up --build
 
 ---
 
 ### 4. Acceder a la aplicación
 
-* Backend API: http://localhost:5000
-* Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
+- Frontend: http://localhost:3000
 
 ---
 
-##  Servicios definidos
+## Servicios definidos
 
 ### Backend (API)
 
-* Construido con Flask
-* Ejecuta migraciones automáticamente:
+- Construido con Flask
+- Ejecuta migraciones automáticamente:
 
-  ```bash
-  flask db upgrade
-  ```
-* Puerto expuesto: 5000
+        flask db upgrade
+
+- Puerto expuesto: 5000
 
 ---
 
 ### Base de datos (MariaDB)
 
-* Contenedor independiente
-* Persistencia mediante volumen
-* Healthcheck configurado
+- Contenedor independiente
+- Persistencia mediante volumen
+- Healthcheck configurado
 
 ---
 
 ### Frontend
 
-* Aplicación cliente conectada al backend
-* Puerto expuesto: 3000
+- Aplicación cliente conectada al backend
+- Puerto expuesto: 3000
 
 ---
 
 ## Red y volúmenes
 
-* Red personalizada: `petcare_net`
-* Volumen persistente: `petcare_db_data`
+- Red personalizada: `petcare_net`
+- Volumen persistente: `petcare_db_data`
+
+---
+
+## Ejecución de pruebas
+
+### Requisitos
+
+- Python 3.10 o superior
+- pip
+- virtualenv (opcional)
+
+---
+
+### Preparar entorno de pruebas
+
+Crear entorno virtual:
+
+    python -m venv venv
+
+Activar entorno:
+
+Linux / Mac:
+
+    source venv/bin/activate
+
+Windows:
+
+    venv\Scripts\activate
+
+Instalar dependencias:
+
+    pip install -r requirements.txt
+
+Instalar dependencias de testing:
+
+    pip install -r requirements-test.txt
+
+---
+
+### Ejecutar pruebas
+
+Ejecutar todas las pruebas:
+
+    pytest
+
+Pruebas unitarias:
+
+    pytest tests/unit/
+
+Pruebas de integración:
+
+    pytest tests/integration/
+
+Pruebas smoke:
+
+    pytest tests/smoke/
+
+---
+
+### Ejecuciones específicas
+
+Archivo específico:
+
+    pytest tests/unit/test_pets.py
+
+Prueba específica:
+
+    pytest tests/unit/test_pets.py::test_nombre_de_la_prueba
+
+---
+
+### Opciones útiles
+
+Modo detallado:
+
+    pytest -v
+
+Mostrar logs:
+
+    pytest -s
+
+Detener en primer error:
+
+    pytest -x
+
+Limpiar caché:
+
+    pytest --cache-clear
+
+---
+
+### Consideraciones
+
+- Configurar variables de entorno (.env si aplica)
+- Algunas pruebas requieren base de datos activa
+- Revisar `conftest.py` para configuración global
 
 ---
 
 ## Comandos útiles
 
-### Detener servicios
+Detener servicios:
 
-```bash
-docker-compose down
-```
+    docker-compose down
 
-### Ver logs
+Ver logs:
 
-```bash
-docker-compose logs -f
-```
+    docker-compose logs -f
 
-### Reconstruir contenedores
+Reconstruir contenedores:
 
-```bash
-docker-compose up --build
-```
+    docker-compose up --build
 
 ---
-
